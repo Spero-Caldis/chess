@@ -5,13 +5,15 @@ from chess.game import Game
 FPS = 60
 
 WIN = pygame.display.set_mode((WIDTH,HEIGHT))
-pygame.display.set_caption('Checkers')
+pygame.display.set_caption('Chess')
+
 
 def get_row_col_from_mouse(pos):
     x,y = pos
     row = y // SQUARE_SIZE
     col = x // SQUARE_SIZE
     return row, col
+
 
 def main():
     run = True  

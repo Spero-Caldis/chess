@@ -1,18 +1,28 @@
 import pygame
-from .constants import SQUARE_1, SQUARE_2, ROWS, COLS, SQUARE_SIZE
+from .constants import SQUARE_1, SQUARE_2, ROWS, COLS, SQUARE_SIZE, BLACK, WHITE
 from .piece import Piece
+
 
 class Board:
     def writerow(self, row, row_num):
+
         temp = []
-        for col ,piece in enumerate(row):
-            if piece.isdigit():
-                for j in range(int(piece)):
-                    temp.append('.')
+        for character in row:
+            if character.isdigit():
+                temp += '.'*int(character)
             else:
-                temp.append(Piece(row_num, col, piece))
-        return temp
-            
+                temp += character
+
+        output = []
+        for col, character in enumerate(temp):
+            if character == '.':
+                output.append(character)
+            else:
+                output.append(Piece(row_num, col, character))
+        
+        return output
+
+
     def __init__(self, fen_string):
         info = fen_string.split(' ')
         rows = info[0].split('/')
@@ -23,8 +33,10 @@ class Board:
         self.halfmove = info[4]
         self.fullmove = info[5]
 
+
     def get_turn(self):
         return self.turn
+
 
     def get_board_string(self):
         output = ""
@@ -32,11 +44,13 @@ class Board:
             output += ' '.join(row) + '\n'
         return output
     
+
     def get_turn_string(self):
         if self.turn == 'w':
             return 'White to move'
         else:
             return 'Black to move'
+
 
     def get_castle_string(self,colour):
         if colour == 'w':
@@ -58,16 +72,20 @@ class Board:
             else:
                 return 'Black cannot castle'
 
+
     def get_en_passant_string(self):
         if self.en_passant == '-':
             return 'No en passant square'
         return 'The en passant square is: ' + self.en_passant
 
+
     def get_halfmove_string(self):
         return 'Halfmove clock: ' + str(self.halfmove)
-    
+
+
     def get_fullmove_string(self):
         return 'Fullmove number: ' + str(self.fullmove)
+
 
     def get_game_state_string(self):
         output = ""
@@ -80,9 +98,11 @@ class Board:
         output += self.get_fullmove_string()
         return output
 
+
     def __str__(self):
         output = self.get_game_state_string()
         return output
+
 
     def draw_squares(self,win):
         win.fill(SQUARE_1)
@@ -90,6 +110,7 @@ class Board:
             for col in range(row % 2 , ROWS, 2):
                 pygame.draw.rect(win, SQUARE_2, (row*SQUARE_SIZE , col*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
     
+
     def move(self, piece : Piece, row, col):
         self.board[piece.row][piece.col], self.board[row][col] = self.board[row][col], self.board[piece.row][piece.col]
         piece.move(row, col)
@@ -98,9 +119,11 @@ class Board:
             pass
             #TODO make it so pawns can become other piece when touching opposite end
     
+
     def get_piece(self, row, col):
         return self.board[row][col]
     
+
     def draw(self, win):
         self.draw_squares(win)
         for row in range(ROWS):
@@ -109,10 +132,77 @@ class Board:
                 if piece != '.':
                     piece.draw(win)
     
+
     def remove(self, piece):
         self.board[piece.row][piece.col] = '.'
         #TODO keep track of the chess score of each player
     
+
+    def get_valid(self, piece):
+        moves = dict()
+
+        coords = piece.get_pos()
+        colour = piece.get_colour()
+        if colour == WHITE:
+            direction = -1
+        elif colour == BLACK:
+            direction = 1
+        
+        match piece.get_piece_type():
+            case 'Pawn':
+                moves.update(self._get_pawn_moves(coords, colour, direction)) 
+            case 'Rook':
+                moves.update(self._get_Rook_moves(coords, colour)) 
+            case 'Knight':
+                moves.update(self._get_Knight_moves(coords, colour)) 
+            case 'Bishop':
+                moves.update(self._get_Bishop_moves(coords, colour))
+            case 'Queen':
+                moves.update(self._get_Queen_moves(coords, colour))
+            case 'King':
+                moves.update(self._get_King_moves(coords, colour)) 
+        return moves
+    
+
+    def _check_diagonal(start_coords, direction, colour, continuos=False):
+        pass
+
+
+    def _check_vertical(start_coords, direction, colour, continuos=False):
+        pass
+
+
+    def _check_horizontal(start_coords, colour, continuos=False):
+        pass
+
+
+    def _check_rook(start_coords, colour):
+        pass
+
+
+    def _get_pawn_moves(self, coords,colour, direction):
+        pass
+
+
+    def _get_X_moves(self, coords, colour):
+        pass
+
+
+    def _get_X_moves(self, coords, colour):
+        pass
+
+
+    def _get_X_moves(self, coords, colour):
+        pass
+
+
+    def _get_X_moves(self, coords, colour):
+        pass
+
+
+    def _get_X_moves(self, coords, colour):
+        pass
+
     
     # def winner(self):
     #     if self.red_left <= 0:
@@ -120,25 +210,11 @@ class Board:
     #     elif self.green_left <= 0:
     #         return "RED WINDS!"
     #     return None
-
-    # def get_valid(self, piece):
-    #     moves = dict()
-    #     coords = piece.get_pos()
-    #     color = piece.get_color()
-    #     if piece.get_king():
-    #         direction = 0
-    #     elif color == PLAYER_1:
-    #         direction = -1
-    #     elif color == PLAYER_2:
-    #         direction = 1
-    #     moves.update(self._traverse(coords, color, direction))
-
-    #     return moves
     
-    # def transform(self, start_pos, row_col):
-    #     row = start_pos[0] + row_col[0] 
-    #     col = start_pos[1] + row_col[1]
-    #     return row, col
+    def transform(self, start_pos, row_col):
+        row = start_pos[0] + row_col[0] 
+        col = start_pos[1] + row_col[1]
+        return row, col
 
     # def is_on_board(self, row, col):
     #     if row < 0 or row >= ROWS:

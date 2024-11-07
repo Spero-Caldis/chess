@@ -1,12 +1,13 @@
 import pygame
 
+# Drawing things on the board
 WIDTH, HEIGHT = 800,800
 ROWS,COLS = 8,8
 SQUARE_SIZE = WIDTH//COLS
 temp = round(SQUARE_SIZE*0.6)
 PIECE_SIZE = (temp, temp)
 
-#RGB
+#Colours
 WHITE_PLAYER = (255,0,0)
 BLACK_PLAYER = (255, 255, 255)
 SQUARE_1 = '#5C4033' #Black squares
@@ -15,6 +16,11 @@ VALID = (0,0,255) #Showing valid movements for a given piece
 
 #Starting Fen string
 START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
+
+#Players
+WHITE = 'w'
+BLACK = 'b'
 
 #Pieces in format 'piece code' : pygame.transform.scale(pygame.image.load('path/to/image'), (width, height))
 #Uppercase means WHITE, lower case mean BLACK
