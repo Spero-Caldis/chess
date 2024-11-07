@@ -1,5 +1,5 @@
 import pygame
-from .constants import SQUARE_1, SQUARE_2, ROWS, COLS, PLAYER_1, PLAYER_2, SQUARE_SIZE
+from .constants import SQUARE_1, SQUARE_2, ROWS, COLS, SQUARE_SIZE
 from .piece import Piece
 
 class Board:
@@ -17,72 +17,102 @@ class Board:
         info = fen_string.split(' ')
         rows = info[0].split('/')
         self.board = [self.writerow(rows[x], x) for x in range(8)]
+        self.turn = info[1]
+        self.castle = info[2]
+        self.en_passant = info[3]
+        self.halfmove = info[4]
+        self.fullmove = info[5]
 
+    def get_turn(self):
+        return self.turn
 
-
-
-
-
-    # def __init__(self):
-    #     self.board = []
-    #     self.red_left = 12
-    #     self.green_left = 12
-    #     self.red_kings = 0
-    #     self.green_kings = 0
-    #     self.create_board()
-
-    # def draw_squares(self,win):
-    #     win.fill(SQUARE_1)
-    #     for row in range(ROWS):
-    #         for col in range(row % 2 , ROWS, 2):
-    #             pygame.draw.rect(win, SQUARE_2, (row*SQUARE_SIZE , col*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+    def get_board_string(self):
+        output = ""
+        for row in self.board:
+            output += ' '.join(row) + '\n'
+        return output
     
-    # def move(self, piece, row, col):
-    #     self.board[piece.row][piece.col], self.board[row][col] = self.board[row][col], self.board[piece.row][piece.col]
-    #     piece.move(row, col)
+    def get_turn_string(self):
+        if self.turn == 'w':
+            return 'White to move'
+        else:
+            return 'Black to move'
+
+    def get_castle_string(self,colour):
+        if colour == 'w':
+            if 'KQ' in self.castle:
+                return 'White can castle both sides'
+            elif 'K' in self.castle:
+                return 'White can castle King side'
+            elif 'Q' in self.castle:
+                return 'White can castle Queen side'
+            else:
+                return 'White cannot castle'
+        else:
+            if 'kq' in self.castle:
+                return 'Black can castle both sides'
+            elif 'k' in self.castle:
+                return 'Black can castle King side'
+            elif 'q' in self.castle:
+                return 'Black can castle Queen side'
+            else:
+                return 'Black cannot castle'
+
+    def get_en_passant_string(self):
+        if self.en_passant == '-':
+            return 'No en passant square'
+        return 'The en passant square is: ' + self.en_passant
+
+    def get_halfmove_string(self):
+        return 'Halfmove clock: ' + str(self.halfmove)
+    
+    def get_fullmove_string(self):
+        return 'Fullmove number: ' + str(self.fullmove)
+
+    def get_game_state_string(self):
+        output = ""
+        output += self.draw_board() + '\n'
+        output += self.get_turn_string() + '\n'
+        output += self.get_castle_string('w') + '\n'
+        output += self.get_castle_string('b') + '\n'
+        output += self.get_en_passant_string() + '\n'
+        output += self.get_halfmove_string() + '\n'
+        output += self.get_fullmove_string()
+        return output
+
+    def __str__(self):
+        output = self.get_game_state_string()
+        return output
+
+    def draw_squares(self,win):
+        win.fill(SQUARE_1)
+        for row in range(ROWS):
+            for col in range(row % 2 , ROWS, 2):
+                pygame.draw.rect(win, SQUARE_2, (row*SQUARE_SIZE , col*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+    
+    def move(self, piece : Piece, row, col):
+        self.board[piece.row][piece.col], self.board[row][col] = self.board[row][col], self.board[piece.row][piece.col]
+        piece.move(row, col)
         
-    #     if row == ROWS - 1 or row == 0:
-    #         piece.make_king()
-    #         if piece.color == PLAYER_2:
-    #             self.green_kings += 1
-    #         else:
-    #             self.red_kings += 1
+        if (row == ROWS - 1 or row == 0) and piece.get_piece_type() == 'Pawn':
+            pass
+            #TODO make it so pawns can become other piece when touching opposite end
     
-    # def get_piece(self, row, col):
-    #     return self.board[row][col]
-
-
-    # def create_board(self):
-    #     for row in range(ROWS):
-    #         self.board.append([])
-    #         for col in range(COLS):
-    #             if col % 2 == ((row + 1) % 2):
-    #                 if row < 3:
-    #                     self.board[row].append(Piece(row, col, PLAYER_2))  
-    #                 elif row > 4:
-
-    #                     self.board[row].append(Piece(row, col, PLAYER_1))
-    #                 else:
-    #                     self.board[row].append(0)
-    #             else:
-    #                 self.board[row].append(0)
-
-    # def draw(self, win):
-    #     self.draw_squares(win)
-    #     for row in range(ROWS):
-    #         for col in range(COLS):
-    #             piece = self.board[row][col]
-    #             if piece != 0:
-    #                 piece.draw(win)
+    def get_piece(self, row, col):
+        return self.board[row][col]
     
-    # def remove(self, pieces):
-    #     for piece in pieces:
-    #         self.board[piece.row][piece.col] = 0
-    #         if piece != 0:
-    #             if piece.color == PLAYER_1:
-    #                 self.red_left -= 1
-    #             else:
-    #                 self.green_left -= 1
+    def draw(self, win):
+        self.draw_squares(win)
+        for row in range(ROWS):
+            for col in range(COLS):
+                piece = self.board[row][col]
+                if piece != '.':
+                    piece.draw(win)
+    
+    def remove(self, piece):
+        self.board[piece.row][piece.col] = '.'
+        #TODO keep track of the chess score of each player
+    
     
     # def winner(self):
     #     if self.red_left <= 0:

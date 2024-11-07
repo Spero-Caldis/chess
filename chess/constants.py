@@ -10,8 +10,9 @@ BLACK_PLAYER = (255, 255, 255)
 SQUARE_1 = (0,0,0) #Black squares
 SQUARE_2 = (255,255,255) #White squares
 VALID = (0,0,255) #Showing valid movements for a given piece
-# BORDER = (128, 128, 128)
-# CROWN = pygame.transform.scale(pygame.image.load('checkers/assets/crown.png'), (44,25))
+
+#Starting Fen string
+START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 #Pieces in format 'piece code' : pygame.transform.scale(pygame.image.load('path/to/image'), (width, height))
 #Uppercase means WHITE, lower case mean BLACK
@@ -35,3 +36,13 @@ PIECE_SPRITES = {
     'k' : pygame.transform.scale(pygame.image.load('chess/assets/black_king.png'), (60, 60))
 }
 
+#Code to Name converter
+
+CODE_TO_NAME = {
+    'p' : 'Pawn',
+    'r' : 'Rook',
+    'n' : 'Knight',
+    'b' : 'Bishop',
+    'q' : 'Queen',
+    'k' : 'King'
+}

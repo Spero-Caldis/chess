@@ -1,11 +1,12 @@
-from .constants import SQUARE_SIZE, PIECE_SPRITES
+from .constants import SQUARE_SIZE, PIECE_SPRITES, CODE_TO_NAME
 
 class Piece:
 
     def __init__(self, row, col, piece):
         self.row = row
         self.col = col
-        self.piece = piece
+        self.piece_code = piece
+        self.piece_type = CODE_TO_NAME[piece]
         if piece.lower() == piece:
             self.colour = 'BLACK'
         else:
@@ -15,6 +16,9 @@ class Piece:
         self.y = 0
         self.calc_pos()
     
+    def get_piece_type(self):
+        return self.piece_type
+
     def get_sprite(self,piece):
         try:
             sprite = PIECE_SPRITES[piece]
