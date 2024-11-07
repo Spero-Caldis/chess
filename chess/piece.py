@@ -6,18 +6,24 @@ class Piece:
         self.row = row
         self.col = col
         self.piece_code = piece
-        self.piece_type = CODE_TO_NAME[piece]
+        self.piece_type = CODE_TO_NAME[piece.lower()]
         if piece.lower() == piece:
-            self.colour = 'BLACK'
+            self.colour = 'b'
         else:
-            self.colour = 'WHITE'
+            self.colour = 'w'
         self.piece_sprite = self.get_sprite(piece)
         self.x = 0
         self.y = 0
         self.calc_pos()
     
+    def get_piece_code(self):
+        return self.piece_code
+    
     def get_piece_type(self):
         return self.piece_type
+
+    def get_coords(self):
+        return (self.x, self.y)
 
     def get_sprite(self,piece):
         try:
@@ -36,6 +42,12 @@ class Piece:
     
     def get_colour(self):
         return self.colour
+    
+    def get_colour_full(self):
+        if self.colour == 'W':
+            return 'WHITE'
+        else:
+            return 'BLACK'
 
     def draw(self, win):
         PIECE = self.piece_sprite
@@ -48,3 +60,11 @@ class Piece:
 
     def __repr__(self):
         return self.piece
+
+    def __str__(self):
+        output = 'Colour = ' + self.get_colour_full() + '\n'
+        output += 'Code = ' + self.get_piece_code() + '\n'
+        output += 'Type = ' + self.get_piece_type() + '\n'
+        output += '(row, col) = ' + self.get_pos() + '\n'
+        output += '(x, y) = ' + self.get_coords() + '\n'
+        return output

@@ -33,31 +33,23 @@ class Game:
         else:
             self.turn = 'w'
 
+    def select(self, row, col):        
+        if self.selected and (row,col) in self.valid_moves:
+            result = self._move(row, col)
+            if not result:
+                self.selected = None
+                self.select(row, col)
+        
+        piece = self.board.get_piece(row, col)
+        if piece != '.' and piece.get_colour() == self.turn: # and self.board.get_valid(piece)
+            print(f"")
+            # self.selected = piece
+            # self.valid_moves = self.board.get_valid(piece)
+            # return True
+        return False
+
 #     def winner(self):
 #         return self.board.winner()
-
-    # def select(self, row, col):
-    #     if self.board.skipped:
-    #         self.board.skipped = False
-    #         if (row, col) in self.valid_moves:
-    #             self._move(row, col)
-    #         else:
-    #             self.change_turn()
-    #         return
-
-
-    #     if self.selected and (row,col) in self.valid_moves:
-    #         result = self._move(row, col)
-    #         if not result:
-    #             self.selected = None
-    #             self.select(row, col)
-        
-    #     piece = self.board.get_piece(row, col)
-    #     if piece != 0 and piece.color == self.turn and self.board.get_valid(piece):
-    #         self.selected = piece
-    #         self.valid_moves = self.board.get_valid(piece)
-    #         return True
-    #     return False
 
     # def _move(self, row, col):
     #     piece = self.board.get_piece(row, col)
