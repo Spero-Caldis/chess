@@ -44,7 +44,7 @@ class Piece:
         return self.colour
     
     def get_colour_full(self):
-        if self.colour == 'W':
+        if self.colour == 'w':
             return 'WHITE'
         else:
             return 'BLACK'
@@ -65,6 +65,6 @@ class Piece:
         output = 'Colour = ' + self.get_colour_full() + '\n'
         output += 'Code = ' + self.get_piece_code() + '\n'
         output += 'Type = ' + self.get_piece_type() + '\n'
-        output += '(row, col) = ' + self.get_pos() + '\n'
-        output += '(x, y) = ' + self.get_coords() + '\n'
+        output += '(row, col) = ' + str(self.get_pos()) + '\n'
+        output += '(x, y) = ' + str(self.get_coords()) + '\n'
         return output

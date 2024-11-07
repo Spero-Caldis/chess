@@ -1,14 +1,16 @@
 import pygame
 
-WIDTH,HEIGHT = 800,800
+WIDTH, HEIGHT = 800,800
 ROWS,COLS = 8,8
 SQUARE_SIZE = WIDTH//COLS
+temp = round(SQUARE_SIZE*0.6)
+PIECE_SIZE = (temp, temp)
 
 #RGB
 WHITE_PLAYER = (255,0,0)
 BLACK_PLAYER = (255, 255, 255)
-SQUARE_1 = (0,0,0) #Black squares
-SQUARE_2 = (255,255,255) #White squares
+SQUARE_1 = '#5C4033' #Black squares
+SQUARE_2 = '#C4A484' #White squares
 VALID = (0,0,255) #Showing valid movements for a given piece
 
 #Starting Fen string
@@ -21,19 +23,19 @@ START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 PIECE_SPRITES = {
 #White pieces
-    'P' : pygame.transform.scale(pygame.image.load('chess/assets/white_pawn.png'), (60, 60)), 
-    'R' : pygame.transform.scale(pygame.image.load('chess/assets/white_rook.png'), (60, 60)),
-    'N' : pygame.transform.scale(pygame.image.load('chess/assets/white_knight.png'), (60, 60)),
-    'B' : pygame.transform.scale(pygame.image.load('chess/assets/white_bishop.png'), (60, 60)),
-    'Q' : pygame.transform.scale(pygame.image.load('chess/assets/white_queen.png'), (60, 60)),
-    'K' : pygame.transform.scale(pygame.image.load('chess/assets/white_king.png'), (60, 60)),
+    'P' : pygame.transform.scale(pygame.image.load('chess/assets/white_pawn.png'), PIECE_SIZE), 
+    'R' : pygame.transform.scale(pygame.image.load('chess/assets/white_rook.png'), PIECE_SIZE),
+    'N' : pygame.transform.scale(pygame.image.load('chess/assets/white_knight.png'), PIECE_SIZE),
+    'B' : pygame.transform.scale(pygame.image.load('chess/assets/white_bishop.png'), PIECE_SIZE),
+    'Q' : pygame.transform.scale(pygame.image.load('chess/assets/white_queen.png'), PIECE_SIZE),
+    'K' : pygame.transform.scale(pygame.image.load('chess/assets/white_king.png'), PIECE_SIZE),
 #Black pieces
-    'p' : pygame.transform.scale(pygame.image.load('chess/assets/black_pawn.png'), (60, 60)),
-    'r' : pygame.transform.scale(pygame.image.load('chess/assets/black_rook.png'), (60, 60)),
-    'n' : pygame.transform.scale(pygame.image.load('chess/assets/black_knight.png'), (60, 60)),
-    'b' : pygame.transform.scale(pygame.image.load('chess/assets/black_bishop.png'), (60, 60)),
-    'q' : pygame.transform.scale(pygame.image.load('chess/assets/black_queen.png'), (60, 60)),
-    'k' : pygame.transform.scale(pygame.image.load('chess/assets/black_king.png'), (60, 60))
+    'p' : pygame.transform.scale(pygame.image.load('chess/assets/black_pawn.png'), PIECE_SIZE),
+    'r' : pygame.transform.scale(pygame.image.load('chess/assets/black_rook.png'), PIECE_SIZE),
+    'n' : pygame.transform.scale(pygame.image.load('chess/assets/black_knight.png'), PIECE_SIZE),
+    'b' : pygame.transform.scale(pygame.image.load('chess/assets/black_bishop.png'), PIECE_SIZE),
+    'q' : pygame.transform.scale(pygame.image.load('chess/assets/black_queen.png'), PIECE_SIZE),
+    'k' : pygame.transform.scale(pygame.image.load('chess/assets/black_king.png'), PIECE_SIZE)
 }
 
 #Code to Name converter
