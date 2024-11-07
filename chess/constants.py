@@ -15,7 +15,8 @@ SQUARE_2 = '#C4A484' #White squares
 VALID = (0,0,255) #Showing valid movements for a given piece
 
 #Starting Fen string
-START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+# START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+START_FEN = "rnbqkbnr/8/8/pppppppp/PPPPPPPP/8/8/RNBQKBNR w KQkq - 0 1"
 
 
 #Players

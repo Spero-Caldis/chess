@@ -36,6 +36,14 @@ class Board:
 
     def get_turn(self):
         return self.turn
+    
+    
+    def get_en_passant(self):
+        if self.en_passant == '-':
+            return '-'
+        row = int(self.en_passant[1])
+        col = 'abcdefgh'.find(self.en_passant[0])
+        return (row, col)
 
 
     def get_board_string(self):
@@ -139,120 +147,161 @@ class Board:
     
 
     def get_valid(self, piece):
-        moves = dict()
-
         coords = piece.get_pos()
         colour = piece.get_colour()
-        if colour == WHITE:
+        if colour == WHITE and piece.get_piece_type() == 'Pawn':
             direction = -1
-        elif colour == BLACK:
+        elif colour == BLACK and piece.get_piece_type() == 'Pawn':
             direction = 1
         
         match piece.get_piece_type():
             case 'Pawn':
-                moves.update(self._get_pawn_moves(coords, colour, direction)) 
+                moves = self._get_pawn_moves(coords, colour, direction)
             case 'Rook':
-                moves.update(self._get_Rook_moves(coords, colour)) 
+                moves = self._get_rook_moves(coords, colour) 
             case 'Knight':
-                moves.update(self._get_Knight_moves(coords, colour)) 
+                moves = self._get_knight_moves(coords, colour)
             case 'Bishop':
-                moves.update(self._get_Bishop_moves(coords, colour))
+                moves = self._get_bishop_moves(coords, colour)
             case 'Queen':
-                moves.update(self._get_Queen_moves(coords, colour))
+                moves = self._get_queen_moves(coords, colour)
             case 'King':
-                moves.update(self._get_King_moves(coords, colour)) 
+                moves = self._get_king_moves(coords, colour) 
+            
+        return moves
+    
+    def is_on_board(self, row, col):
+        if row < 0 or row >= ROWS:
+            return False
+        if col < 0 or col >= COLS:
+            return False 
+        return True
+    
+
+    def transform(self, start_pos, row_col):
+        row = start_pos[0] + row_col[0] 
+        col = start_pos[1] + row_col[1]
+        return row, col
+    
+
+    def _traverse(self, start_coords, colour, continuos, transformations, pawn=False):
+        moves = []
+
+        for transformation in transformations:
+            working_coords = start_coords
+
+            while True:
+                row, col = self.transform(working_coords, transformation)
+
+                if not self.is_on_board(row, col):
+                    break
+                
+                current = self.board[row][col]
+
+                if pawn == 'diagonal' and (current == '.' or current.colour == colour):
+                    break
+                elif pawn == 'diagonal ' and ((row, col) == self.get_en_passant() or current.colour != colour):
+                    moves.append( (row, col) )
+                elif pawn == 'vert' and current != '.':
+                    break
+                elif current == '.':
+                    moves.append( (row, col) )
+                elif current.get_colour() == colour:
+                    break
+                elif current.get_colour() != colour:
+                    moves.append( (row, col) )
+                
+                working_coords = (row, col)
+                
+                if not continuos:
+                    break
+
         return moves
     
 
-    def _check_diagonal(start_coords, direction, colour, continuos=False):
-        pass
+    def _traverse_diagonal(self, start_coords, direction, colour, continuos):
+        transformations = []
+        if direction != 0:
+            pawn = 'diagonal'
+        else:
+            pawn = False
+        if direction <= 0:
+            transformations += [(-1,-1),(-1,1)]
+        if direction >= 0:
+            transformations += [(1,-1),(1,1)]
+        
+        return self._traverse(start_coords, colour, continuos, transformations, pawn)
 
 
-    def _check_vertical(start_coords, direction, colour, continuos=False):
-        pass
+    def _traverse_vertical(self, start_coords, direction, colour, continuos):
+        transformations = []
+        if direction != 0:
+            pawn = 'vertical'
+        else:
+            pawn = False
+        if direction <= 0:
+            transformations += [(-1,0)]
+        if direction >= 0:
+            transformations += [(1,0)]
+        
+        return self._traverse(start_coords, colour, continuos, transformations, pawn)
 
 
-    def _check_horizontal(start_coords, colour, continuos=False):
-        pass
+
+    def _traverse_horizontal(self, start_coords, colour, continuos):
+        transformations = [(0,1),(0,-1)]  
+        return self._traverse(start_coords, colour, continuos, transformations, continuos)
 
 
-    def _check_rook(start_coords, colour):
-        pass
+    def _traverse_knight(self, start_coords, colour):
+        moves = []
+        transformations = [(1, 2) ,(-1, 2) ,(1, -2) ,(-1, -2) ,(2, 1) ,(-2, 1) ,(2, -1) ,(-2, -1)]
+        moves += self._traverse(start_coords, colour, False, transformations)
+        
+        return moves
 
 
-    def _get_pawn_moves(self, coords,colour, direction):
-        pass
+    def _get_pawn_moves(self, coords, colour, direction):
+        moves = []
+        moves += self._traverse_diagonal(coords, direction, colour, False)
+        moves += self._traverse_vertical(coords, direction, colour, False)
+        return moves
 
 
-    def _get_X_moves(self, coords, colour):
-        pass
-
-
-    def _get_X_moves(self, coords, colour):
-        pass
-
-
-    def _get_X_moves(self, coords, colour):
-        pass
-
-
-    def _get_X_moves(self, coords, colour):
-        pass
-
-
-    def _get_X_moves(self, coords, colour):
-        pass
-
+    def _get_rook_moves(self, coords, colour):
+        moves = []
+        moves += self._traverse_vertical(coords, 0, colour, True)
+        moves += self._traverse_horizontal(coords, colour, True)
+        return moves
     
+
+    def _get_knight_moves(self, coords, colour):
+        return self._traverse_knight(coords, colour)
+
+
+    def _get_bishop_moves(self, coords, colour):
+        return self._traverse_diagonal(coords, 0, colour, True)
+
+
+    def _get_queen_moves(self, coords, colour):
+        moves = []
+        moves += self._traverse_diagonal(coords, 0, colour, True)
+        moves += self._traverse_vertical(coords, 0, colour, True)
+        moves += self._traverse_horizontal(coords, colour, True)
+        return moves
+
+
+    def _get_king_moves(self, coords, colour):
+        moves = []
+        moves += self._traverse_diagonal(coords, 0, colour, False)
+        moves += self._traverse_vertical(coords, 0, colour, False)
+        moves += self._traverse_horizontal(coords, colour, False)
+        return moves
+
+
     # def winner(self):
     #     if self.red_left <= 0:
     #         return "GREEN WINS!"
     #     elif self.green_left <= 0:
     #         return "RED WINDS!"
     #     return None
-    
-    def transform(self, start_pos, row_col):
-        row = start_pos[0] + row_col[0] 
-        col = start_pos[1] + row_col[1]
-        return row, col
-
-    # def is_on_board(self, row, col):
-    #     if row < 0 or row >= ROWS:
-    #         return False
-    #     if col < 0 or col >= COLS:
-    #         return False 
-    #     return True
-    
-    # def _traverse(self, coords, color, direction):
-    #     moves = {}
-    #     transformations = []
-
-    #     if direction <= 0:
-    #         transformations += [(-1,-1),(-1,1)]
-    #     if direction >= 0:
-    #         transformations += [(1,-1),(1,1)]
-        
-    #     for transformation in transformations:
-    #         row ,col = self.transform(coords, transformation)
-    #         if not self.is_on_board(row,col):
-    #             continue
-
-    #         current = self.board[row][col]
-
-    #         if current == 0:
-    #             if self.skipped:
-    #                 continue
-    #             else:
-    #                 moves[(row),(col)] = current
-    #                 continue
-
-    #         elif current.get_color() == color:
-    #             continue
-
-    #         row, col = self.transform((row,col),transformation)
-    #         if not self.is_on_board(row,col):
-    #             continue
-            
-    #         if self.board[row][col] == 0:
-    #             moves[(row, col)] = [current]
-    #     return moves

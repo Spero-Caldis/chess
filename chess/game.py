@@ -44,38 +44,27 @@ class Game:
 
     def select(self, row, col):        
         if self.selected and (row,col) in self.valid_moves:
-            result = self._move(row, col)
-            if not result:
-                self.selected = None
-                self.select(row, col)
-
+            self._move(row, col)
+            return
 
         piece = self.board.get_piece(row, col)
-        if piece != '.' and piece.get_colour() == self.turn: # and self.board.get_valid(piece)
-            print(piece)
-            # self.selected = piece
-            # self.valid_moves = self.board.get_valid(piece)
+        if piece != '.' :#and piece.get_colour() == self.turn: # and self.board.get_valid(piece)
+            self.selected = piece
+            self.valid_moves = self.board.get_valid(piece)
             return True
         return False
 
 
+    def _move(self, row, col):
+        # piece = self.board.get_piece(row, col)
+        if self.selected and (row, col) in self.valid_moves:
+            self.board.move(self.selected, row, col)
+            self.change_turn()
+            self.selected = None
+            self.valid_moves = {}
+        else:
+            return False
+        return True
+
 #     def winner(self):
 #         return self.board.winner()
-
-    # def _move(self, row, col):
-    #     piece = self.board.get_piece(row, col)
-    #     if self.selected and piece == 0 and (row, col) in self.valid_moves:
-    #         self.board.move(self.selected, row, col)
-    #         skipped = self.valid_moves[(row,col)]
-    #         if skipped:
-    #             self.board.remove(skipped)
-    #             self.board.skipped = True
-    #             piece = self.board.get_piece(row, col)
-    #             self.valid_moves = self.board.get_valid(piece)
-    #             if not self.valid_moves:
-    #                 self.select(0,0)
-    #         else:
-    #             self.change_turn()
-    #     else:
-    #         return False
-    #     return True
