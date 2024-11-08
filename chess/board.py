@@ -180,7 +180,7 @@ class Board:
 
     def move(self, piece : Piece, row, col):
         self._check_en_passant(piece, row, col)
-        
+        self._move(piece, row, col)
         
         if (row == ROWS - 1 or row == 0) and piece.get_piece_type() == 'Pawn':
             pass
