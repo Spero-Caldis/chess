@@ -28,7 +28,7 @@ class Board:
         rows = info[0].split('/')
         self.board = [self.writerow(rows[x], x) for x in range(8)]
         self.turn = info[1]
-        self.castle = self.castle_string_to_list(self, info[2])
+        self.castle = self.castle_string_to_list(info[2])
         self.en_passant = self.get_en_passant_coords(info[3])
         self.halfmove = info[4]
         self.fullmove = info[5]
@@ -102,6 +102,13 @@ class Board:
         return ['K' in s, 'Q' in s, 'k' in s, 'q' in s]
 
 
+    def get_castle(self, colour):
+        if colour == WHITE:
+            return (self.castle[0], self.castle[1])
+        else:
+            return (self.castle[2], self.castle[3])
+        
+
     def get_en_passant_string(self):
         if self.en_passant == '-':
             return 'No en passant square'
@@ -163,13 +170,17 @@ class Board:
         self._set_new_en_passant(piece, row)
 
 
-    def move(self, piece : Piece, row, col):
-        self._check_en_passant(piece, row, col)
+
+    def _move(self, piece : Piece, row, col):
         if self.get_piece(row, col) != '.':
             self.remove(self.get_piece(row, col))
         self.board[row][col],self.board[piece.row][piece.col] = self.board[piece.row][piece.col], '.'
-
         piece.move(row, col)
+
+
+    def move(self, piece : Piece, row, col):
+        self._check_en_passant(piece, row, col)
+        
         
         if (row == ROWS - 1 or row == 0) and piece.get_piece_type() == 'Pawn':
             pass
@@ -192,10 +203,6 @@ class Board:
     def remove(self, piece : Piece):
         self.board[piece.row][piece.col] = '.'
         #TODO keep track of the chess score of each player
-
-    
-    def get_moved(self, piece : Piece):
-        pass
 
 
     def get_valid(self, piece : Piece):
@@ -313,9 +320,35 @@ class Board:
         return moves
 
 
+
+
+    def _traverse_castling(self, colour):
+        moves = []
+        castle_rights = self.get_castle(colour)
+        if not castle_rights[0] and not castle_rights[1]:
+            return moves
+        if colour == WHITE:
+            row_num = ROWS - 1
+        else:
+            row_num = 0
+
+        row = self.board[row_num]
+        if row[5] == row[6] == '.':
+            moves.append((row_num, 6))
+        if row[1] == row[2] == row[3] == '.':
+            moves.append((row_num, 2))
+        
+        return moves
+
+
     def _get_pawn_moves(self, coords, colour):
         moves = []
-        moved = coords[0] == 1 or coords[0] == 6
+        if colour == WHITE and coords[0] == 6:
+            moved = False
+        elif colour == BLACK and coords[0] == 1:
+            moved = False
+        else:
+            moved = True
 
         if colour == WHITE and not moved:
             transformations_vertical = [(-1,0), (-2, 0)]
@@ -365,7 +398,7 @@ class Board:
         moves += self._traverse_diagonal(coords, colour, False)
         moves += self._traverse_vertical(coords, colour, False)
         moves += self._traverse_horizontal(coords, colour, False)
-        moves += self._traverse_castling(coords, colour)
+        moves += self._traverse_castling(colour)
         return moves
 
 
