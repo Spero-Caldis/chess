@@ -19,8 +19,12 @@ class Game:
 
     def draw_valid_moves(self, moves):
         for move in moves:
-            row, col = move
-            pygame.draw.circle(self.win, VALID, (col*SQUARE_SIZE + SQUARE_SIZE//2, row* SQUARE_SIZE + SQUARE_SIZE // 2), 15)
+          row, col = move
+          surface = pygame.Surface((SQUARE_SIZE,SQUARE_SIZE))
+          surface.set_colorkey((0,0,0))  # use `(0,0,0)` (black color) as transparent color
+          surface.set_alpha(128)  # transparency 50% for other colors
+          pygame.draw.circle(surface, VALID, (50,50), 15)
+          self.win.blit(surface, (col*SQUARE_SIZE, row*SQUARE_SIZE))
 
 
     def _init(self):
@@ -56,7 +60,7 @@ class Game:
 
 
     def _move(self, row, col):
-        # piece = self.board.get_piece(row, col)
+        piece = self.board.get_piece(row, col)
         if self.selected and (row, col) in self.valid_moves:
             self.board.move(self.selected, row, col)
             self.change_turn()
