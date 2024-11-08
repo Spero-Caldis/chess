@@ -28,8 +28,8 @@ class Board:
         rows = info[0].split('/')
         self.board = [self.writerow(rows[x], x) for x in range(8)]
         self.turn = info[1]
-        self.castle = info[2]
-        self.en_passant = info[3]
+        self.castle = self.castle_string_to_list(self, info[2])
+        self.en_passant = self.get_en_passant_coords(info[3])
         self.halfmove = info[4]
         self.fullmove = info[5]
 
@@ -38,12 +38,29 @@ class Board:
         return self.turn
     
     
-    def get_en_passant(self):
-        if self.en_passant == '-':
-            return '-'
-        row = int(self.en_passant[1])
+    def get_en_passant_coords(self, en_passant):
+        if en_passant == '-':
+            return False
+        row = int(en_passant[1])
         col = 'abcdefgh'.find(self.en_passant[0])
         return (row, col)
+    
+
+    def get_en_passant(self):
+        return self.en_passant
+    
+
+    def get_en_passant_to_remove(self):
+        if not self.get_en_passant():
+            return False
+        if self.get_en_passant()[0] == 2:
+            return (3, self.get_en_passant()[1])
+        else:
+            return (4, self.get_en_passant()[0])
+
+
+    def set_en_passant(self, new_en_passant):
+        self.en_passant = new_en_passant
 
 
     def get_board_string(self):
@@ -62,23 +79,27 @@ class Board:
 
     def get_castle_string(self,colour):
         if colour == 'w':
-            if 'KQ' in self.castle:
+            if self.castle[0] and self.castle[1]:
                 return 'White can castle both sides'
-            elif 'K' in self.castle:
+            elif self.castle[0]:
                 return 'White can castle King side'
-            elif 'Q' in self.castle:
+            elif self.castle[1]:
                 return 'White can castle Queen side'
             else:
                 return 'White cannot castle'
         else:
-            if 'kq' in self.castle:
+            if self.caste[2] and self.castle[3]:
                 return 'Black can castle both sides'
-            elif 'k' in self.castle:
+            elif self.castle[2]:
                 return 'Black can castle King side'
-            elif 'q' in self.castle:
+            elif self.castle[3]:
                 return 'Black can castle Queen side'
             else:
                 return 'Black cannot castle'
+
+
+    def castle_string_to_list(self, s):
+        return ['K' in s, 'Q' in s, 'k' in s, 'q' in s]
 
 
     def get_en_passant_string(self):
@@ -119,8 +140,35 @@ class Board:
                 pygame.draw.rect(win, SQUARE_2, (row*SQUARE_SIZE , col*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
     
 
+    def _en_passant_used(self, row, col):
+        if (row, col) == self.get_en_passant():
+            to_remove = self.get_en_passant_to_remove()
+            self.remove(self.get_piece(to_remove[0], to_remove[1]))
+
+
+    def _set_new_en_passant(self, piece : Piece, row):
+        if abs(piece.get_row() - row) == 2:
+            row = (piece.get_row() + row)//2
+            self.set_en_passant((row, piece.get_col()))
+        else:
+            self.set_en_passant(False)
+
+
+    def _check_en_passant(self, piece : Piece, row, col):
+        if piece.get_piece_type() != 'Pawn':
+            self.set_en_passant(False)
+            return
+        
+        self._en_passant_used(row, col)
+        self._set_new_en_passant(piece, row)
+
+
     def move(self, piece : Piece, row, col):
-        self.board[row][col], self.board[piece.row][piece.col] = self.board[piece.row][piece.col], '.'
+        self._check_en_passant(piece, row, col)
+        if self.get_piece(row, col) != '.':
+            self.remove(self.get_piece(row, col))
+        self.board[row][col],self.board[piece.row][piece.col] = self.board[piece.row][piece.col], '.'
+
         piece.move(row, col)
         
         if (row == ROWS - 1 or row == 0) and piece.get_piece_type() == 'Pawn':
@@ -141,22 +189,22 @@ class Board:
                     piece.draw(win)
     
 
-    def remove(self, piece):
+    def remove(self, piece : Piece):
         self.board[piece.row][piece.col] = '.'
         #TODO keep track of the chess score of each player
-    
 
-    def get_valid(self, piece):
+    
+    def get_moved(self, piece : Piece):
+        pass
+
+
+    def get_valid(self, piece : Piece):
         coords = piece.get_pos()
         colour = piece.get_colour()
-        if colour == WHITE and piece.get_piece_type() == 'Pawn':
-            direction = -1
-        elif colour == BLACK and piece.get_piece_type() == 'Pawn':
-            direction = 1
-        
+
         match piece.get_piece_type():
             case 'Pawn':
-                moves = self._get_pawn_moves(coords, colour, direction)
+                moves = self._get_pawn_moves(coords, colour)
             case 'Rook':
                 moves = self._get_rook_moves(coords, colour) 
             case 'Knight':
@@ -184,7 +232,7 @@ class Board:
         return row, col
     
 
-    def _traverse(self, start_coords, colour, continuos, transformations, pawn=False):
+    def _traverse(self, start_coords, colour, continuos, transformations):
         moves = []
 
         for transformation in transformations:
@@ -198,20 +246,16 @@ class Board:
                 
                 current = self.board[row][col]
 
-                if pawn == 'diagonal' and (current == '.' or current.colour == colour):
-                    break
-                elif pawn == 'diagonal ' and ((row, col) == self.get_en_passant() or current.colour != colour):
+                if current == '.':
                     moves.append( (row, col) )
-                elif pawn == 'vert' and current != '.':
-                    break
-                elif current == '.':
-                    moves.append( (row, col) )
+                    working_coords = (row, col)
+
                 elif current.get_colour() == colour:
                     break
+
                 elif current.get_colour() != colour:
                     moves.append( (row, col) )
-                
-                working_coords = (row, col)
+                    break
                 
                 if not continuos:
                     break
@@ -219,38 +263,20 @@ class Board:
         return moves
     
 
-    def _traverse_diagonal(self, start_coords, direction, colour, continuos):
-        transformations = []
-        if direction != 0:
-            pawn = 'diagonal'
-        else:
-            pawn = False
-        if direction <= 0:
-            transformations += [(-1,-1),(-1,1)]
-        if direction >= 0:
-            transformations += [(1,-1),(1,1)]
-        
-        return self._traverse(start_coords, colour, continuos, transformations, pawn)
+    def _traverse_diagonal(self, start_coords, colour, continuos):
+        transformations = [(-1,-1) ,(-1,1) ,(1,-1) ,(1,1)]
+        return self._traverse(start_coords, colour, continuos, transformations)
 
 
-    def _traverse_vertical(self, start_coords, direction, colour, continuos):
-        transformations = []
-        if direction != 0:
-            pawn = 'vertical'
-        else:
-            pawn = False
-        if direction <= 0:
-            transformations += [(-1,0)]
-        if direction >= 0:
-            transformations += [(1,0)]
-        
-        return self._traverse(start_coords, colour, continuos, transformations, pawn)
+    def _traverse_vertical(self, start_coords, colour, continuos):
+        transformations = [(-1, 0), (1, 0)]
+        return self._traverse(start_coords, colour, continuos, transformations)
 
 
 
     def _traverse_horizontal(self, start_coords, colour, continuos):
         transformations = [(0,1),(0,-1)]  
-        return self._traverse(start_coords, colour, continuos, transformations, continuos)
+        return self._traverse(start_coords, colour, continuos, transformations)
 
 
     def _traverse_knight(self, start_coords, colour):
@@ -261,16 +287,59 @@ class Board:
         return moves
 
 
-    def _get_pawn_moves(self, coords, colour, direction):
+    def _traverse_pawn_vertical(self, start_coords, transformations):
         moves = []
-        moves += self._traverse_diagonal(coords, direction, colour, False)
-        moves += self._traverse_vertical(coords, direction, colour, False)
+        for transformation in transformations:
+            row, col = self.transform(start_coords, transformation)
+            current = self.board[row][col]
+            if current == '.':
+                moves.append( (row, col) )
+        return moves
+
+
+    def _traverse_pawn_diagonal(self, start_coords, colour, transformations):
+        moves = []
+        for transformation in transformations:
+            row, col = self.transform(start_coords, transformation)
+            coords = (row, col)
+            current = self.board[row][col]
+            en_passant = self.get_en_passant()
+            if coords == en_passant:
+                moves.append( coords )
+            elif current == '.':
+                continue
+            elif current.get_colour() != colour:
+                moves.append( coords ) 
+        return moves
+
+
+    def _get_pawn_moves(self, coords, colour):
+        moves = []
+        moved = coords[0] == 1 or coords[0] == 6
+
+        if colour == WHITE and not moved:
+            transformations_vertical = [(-1,0), (-2, 0)]
+        elif colour == BLACK and not moved:
+            transformations_vertical = [(1,0), (2, 0)]
+        elif colour == WHITE:
+            transformations_vertical = [(-1, 0)]
+        elif colour == BLACK:
+            transformations_vertical = [(1, 0)]
+        
+        moves += self._traverse_pawn_vertical(coords, transformations_vertical)
+
+        if colour == WHITE:
+            transformations_diagonal = [(-1,-1),(-1,1)]
+        if colour == BLACK:
+            transformations_diagonal = [(1,-1),(1,1)]
+        moves += self._traverse_pawn_diagonal(coords, colour, transformations_diagonal)
+
         return moves
 
 
     def _get_rook_moves(self, coords, colour):
         moves = []
-        moves += self._traverse_vertical(coords, 0, colour, True)
+        moves += self._traverse_vertical(coords, colour, True)
         moves += self._traverse_horizontal(coords, colour, True)
         return moves
     
@@ -280,22 +349,23 @@ class Board:
 
 
     def _get_bishop_moves(self, coords, colour):
-        return self._traverse_diagonal(coords, 0, colour, True)
+        return self._traverse_diagonal(coords, colour, True)
 
 
     def _get_queen_moves(self, coords, colour):
         moves = []
-        moves += self._traverse_diagonal(coords, 0, colour, True)
-        moves += self._traverse_vertical(coords, 0, colour, True)
+        moves += self._traverse_diagonal(coords, colour, True)
+        moves += self._traverse_vertical(coords, colour, True)
         moves += self._traverse_horizontal(coords, colour, True)
         return moves
 
 
     def _get_king_moves(self, coords, colour):
         moves = []
-        moves += self._traverse_diagonal(coords, 0, colour, False)
-        moves += self._traverse_vertical(coords, 0, colour, False)
+        moves += self._traverse_diagonal(coords, colour, False)
+        moves += self._traverse_vertical(coords, colour, False)
         moves += self._traverse_horizontal(coords, colour, False)
+        moves += self._traverse_castling(coords, colour)
         return moves
 
 

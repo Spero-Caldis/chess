@@ -49,6 +49,14 @@ class Piece:
         return (self.row, self.col)
 
 
+    def get_col(self):
+        return self.col
+
+
+    def get_row(self):
+        return self.row
+    
+
     def get_colour(self):
         return self.colour
 

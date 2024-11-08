@@ -52,7 +52,7 @@ class Game:
             return
 
         piece = self.board.get_piece(row, col)
-        if piece != '.' :#and piece.get_colour() == self.turn: # and self.board.get_valid(piece)
+        if piece != '.' and piece.get_colour() == self.turn: # and self.board.get_valid(piece)
             self.selected = piece
             self.valid_moves = self.board.get_valid(piece)
             return True
