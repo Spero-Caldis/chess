@@ -17,7 +17,7 @@ class Game:
 
     
     def get_info(self):
-        return self.board.get_turn_string, self.board.get_halfmove_string() , self.board.get_fullmove_string()
+        return self.board.get_turn_string(), self.board.get_halfmove_string() , self.board.get_fullmove_string()
 
 
     def draw_valid_moves(self, moves):

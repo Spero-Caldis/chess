@@ -3,8 +3,6 @@ import pygame
 # Drawing things on the board
 WIDTH, HEIGHT = 800,800
 ROWS,COLS = 8,8
-INFO_DISPLAY_WIDTH = 300
-PADDING = 10
 SQUARE_SIZE = WIDTH//COLS
 temp = round(SQUARE_SIZE*0.6)
 PIECE_SIZE = (temp, temp)
@@ -16,11 +14,16 @@ SQUARE_1 = '#5C4033' #Black squares
 SQUARE_2 = '#C4A484' #White squares
 INFO_DISPLAY_BOARDER = '#00008B'
 INFO_DISPLAY_MAIN = '#ADD8E6'
-VALID = (0,0,255) #Showing valid movements for a given piece
+VALID = (0, 0, 255) #Showing valid movements for a given piece
 
 #Starting Fen string
 START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 # START_FEN = "r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1"
+
+#INFO DISPLAY STUFF
+INFO_DISPLAY_WIDTH = 300
+PADDING = 10
+TEXTCOLOUR = (0, 0, 0)
 
 
 #Players
