@@ -4,6 +4,18 @@ from .piece import Piece
 
 
 class Board:
+    
+    def __init__(self, fen_string):
+            info = fen_string.split(' ')
+            rows = info[0].split('/')
+            self.board = [self.writerow(rows[x], x) for x in range(8)]
+            self.turn = info[1]
+            self.castle = self.castle_string_to_list(info[2])
+            self.en_passant = self.get_en_passant_coords(info[3])
+            self.halfmove = info[4]
+            self.fullmove = info[5]
+
+
     def writerow(self, row, row_num):
         temp = []
         for character in row:
@@ -20,17 +32,6 @@ class Board:
                 output.append(Piece(row_num, col, character))
         
         return output
-
-
-    def __init__(self, fen_string):
-        info = fen_string.split(' ')
-        rows = info[0].split('/')
-        self.board = [self.writerow(rows[x], x) for x in range(8)]
-        self.turn = info[1]
-        self.castle = self.castle_string_to_list(info[2])
-        self.en_passant = self.get_en_passant_coords(info[3])
-        self.halfmove = info[4]
-        self.fullmove = info[5]
 
 
     def get_turn(self):

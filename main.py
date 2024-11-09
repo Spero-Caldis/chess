@@ -1,15 +1,15 @@
 import pygame
-from chess.constants import WIDTH, HEIGHT, SQUARE_SIZE
+from chess.constants import WIDTH, HEIGHT, SQUARE_SIZE, INFO_DISPLAY_WIDTH
 from chess.game import Game
+from chess.display_info import DisplayInfo
 
 FPS = 60
 
-WIN = pygame.display.set_mode((WIDTH + 300,HEIGHT))
+WIN = pygame.display.set_mode((WIDTH + INFO_DISPLAY_WIDTH ,HEIGHT))
 pygame.display.set_caption('Chess')
 
 BOARD = pygame.Surface((WIDTH,HEIGHT))
-
-GAMEINFO = pygame.Surface((300, HEIGHT))
+INFODISPLAY = pygame.Surface((INFO_DISPLAY_WIDTH , HEIGHT))
 
 
 def get_row_col_from_mouse(pos):
@@ -24,6 +24,7 @@ def main():
     run = True  
     clock = pygame.time.Clock()
     game = Game(BOARD)
+    info_display = DisplayInfo(INFODISPLAY, game.get_info())
 
     while run:
         clock.tick(FPS)
@@ -41,6 +42,9 @@ def main():
 
         game.update()
         WIN.blit(BOARD, (0, 0))
+        
+        info_display.update()
+        WIN.blit(INFODISPLAY, (WIDTH, 0))
         pygame.display.update()
     
     pygame.quit()

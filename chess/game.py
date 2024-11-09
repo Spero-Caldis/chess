@@ -15,6 +15,10 @@ class Game:
         self.board.draw(self.win)
         self.draw_valid_moves(self.valid_moves)
 
+    
+    def get_info(self):
+        return self.board.get_turn_string, self.board.get_halfmove_string() , self.board.get_fullmove_string()
+
 
     def draw_valid_moves(self, moves):
         for move in moves:
