@@ -5,7 +5,6 @@ from .piece import Piece
 
 class Board:
     def writerow(self, row, row_num):
-
         temp = []
         for character in row:
             if character.isdigit():
@@ -125,7 +124,7 @@ class Board:
 
     def get_game_state_string(self):
         output = ""
-        output += self.draw_board() + '\n'
+        output += self.get_board_string() + '\n'
         output += self.get_turn_string() + '\n'
         output += self.get_castle_string('w') + '\n'
         output += self.get_castle_string('b') + '\n'
@@ -168,7 +167,39 @@ class Board:
         
         self._en_passant_used(row, col)
         self._set_new_en_passant(piece, row)
+    
+    def _do_castle(self, piece : Piece, row, col):
+        if abs(piece.get_col() - col) == 2:
+            if col == 6:
+                self.move(self.get_piece(row, 7), row, 5)
+            elif col == 2:
+                self.move(self.get_piece(row, 0), row, 3)
+            return True
+        return False
 
+
+    def _check_castle(self, piece : Piece, row, col):
+
+        if piece.get_piece_type() == 'King':
+            self._do_castle(piece, row, col)
+            if piece.get_colour() == WHITE:
+                self.castle[0] = False
+                self.castle[1] = False
+            elif piece.get_colour() == BLACK:
+                self.castle[2] = False
+                self.castle[3] = False
+
+        if piece.get_piece_type() == 'Rook':
+            if piece.get_colour() == WHITE:
+                if piece.get_col() == 7:
+                    self.castle[0] = False
+                elif piece.get_col() == 0:
+                    self.castle[1] = False
+            elif piece.get_colour() == BLACK:
+                if piece.get_col() == 7:
+                    self.castle[2] = False
+                elif piece.get_col() == 0:
+                    self.castle[3] = False
 
 
     def _move(self, piece : Piece, row, col):
@@ -180,8 +211,8 @@ class Board:
 
     def move(self, piece : Piece, row, col):
         self._check_en_passant(piece, row, col)
+        self._check_castle(piece, row, col)
         self._move(piece, row, col)
-        
         if (row == ROWS - 1 or row == 0) and piece.get_piece_type() == 'Pawn':
             pass
             #TODO make it so pawns can become other piece when touching opposite end
@@ -333,9 +364,9 @@ class Board:
             row_num = 0
 
         row = self.board[row_num]
-        if row[5] == row[6] == '.':
+        if row[5] == row[6] == '.' and castle_rights[0]:
             moves.append((row_num, 6))
-        if row[1] == row[2] == row[3] == '.':
+        if row[1] == row[2] == row[3] == '.' and castle_rights[1]:
             moves.append((row_num, 2))
         
         return moves

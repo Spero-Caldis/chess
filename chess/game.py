@@ -14,7 +14,6 @@ class Game:
     def update(self):
         self.board.draw(self.win)
         self.draw_valid_moves(self.valid_moves)
-        pygame.display.update()
 
 
     def draw_valid_moves(self, moves):
@@ -47,6 +46,8 @@ class Game:
 
 
     def select(self, row, col):        
+        if row > 7 or col > 7:
+            return False
         if self.selected and (row,col) in self.valid_moves:
             self._move(row, col)
             return
@@ -60,7 +61,7 @@ class Game:
 
 
     def _move(self, row, col):
-        piece = self.board.get_piece(row, col)
+        # piece = self.board.get_piece(row, col)
         if self.selected and (row, col) in self.valid_moves:
             self.board.move(self.selected, row, col)
             self.change_turn()
