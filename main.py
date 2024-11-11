@@ -1,7 +1,8 @@
 import pygame
-from chess.constants import WIDTH, HEIGHT, SQUARE_SIZE, INFO_DISPLAY_WIDTH
+from chess.constants import WIDTH, HEIGHT, SQUARE_SIZE, INFO_DISPLAY_WIDTH, START_FEN
 from chess.game import Game
 from chess.display_info import DisplayInfo
+import sys
 
 FPS = 60
 
@@ -19,11 +20,22 @@ def get_row_col_from_mouse(pos):
     return row, col
 
 
+def get_fen():
+    try:
+        fen = sys.argv[1]
+        return fen
+    except IndexError:
+        print('No fen string provided, using start string')
+        return START_FEN
+
+
+
 def main():
+    fen = get_fen()
     pygame.init()
     run = True  
     clock = pygame.time.Clock()
-    game = Game(BOARD)
+    game = Game(BOARD, fen)
     info_display = DisplayInfo(INFODISPLAY, game.get_info())
 
     while run:

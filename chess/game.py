@@ -6,8 +6,8 @@ from .board import Board
 class Game:
 
 
-    def __init__(self,win):
-        self._init()
+    def __init__(self, win, fen):
+        self._init(fen)
         self.win = win
 
 
@@ -30,9 +30,9 @@ class Game:
           self.win.blit(surface, (col*SQUARE_SIZE, row*SQUARE_SIZE))
 
 
-    def _init(self):
+    def _init(self, fen):
         self.selected = None
-        self.board = Board(START_FEN)
+        self.board = Board(fen)
         self.turn = self.board.get_turn()
         self.valid_moves = {}
 

@@ -168,16 +168,60 @@ class Board:
         return output
 
 
+    def get_board_as_fen(self):
+        board = self.get_board_list()
+        output = []
+        count = 0
+        for row in board:
+            temp = ''
+            for piece in row:
+                if piece != '.' and count == 0:
+                    temp += piece
+                elif piece == '.':
+                    count += 1
+                elif piece != '.':
+                    temp += str(count)
+                    count = 0
+                    temp += piece
+            if count != 0:
+                temp += str(count)
+                count = 0
+            output.append(temp)
+        return '/'.join(output)
+    
+
     def get_castle(self, colour):
         if colour == WHITE:
             return (self.castle[0], self.castle[1])
         else:
             return (self.castle[2], self.castle[3])
- 
+
+
+    def get_castle_as_fen(self):
+        temp = 'KQkq'
+        output = ''
+        for i, can_castle in enumerate(self.castle):
+            if can_castle:
+                output += temp[i]
+        if len(output) == 0:
+            return '-'
+        return output
+
 
     def get_piece(self, row, col):
         return self.board[row][col]
-    
+
+
+    def get_fen(self):
+        board = self.get_board_as_fen()
+        turn = self.get_turn()
+        castle_rights = self.get_castle_as_fen()
+        en_passant = self.coords_to_string(self.get_en_passant())
+        halfmove = str(self.halfmove)
+        fullmove = str(self.fullmove)
+        fen = ' '.join([board, turn, castle_rights, en_passant, halfmove, fullmove])
+        return fen
+
 
     """
     Mutator methods
@@ -201,9 +245,10 @@ class Board:
             temp = []
             EvolvePawn(temp)
             new_piece_code = temp[0]
-            if piece.get_colour == WHITE:
+            if piece.get_colour() == WHITE:
                 new_piece_code = new_piece_code.upper()
             piece.change_piece_type(new_piece_code)
+
 
     def _set_new_en_passant(self, piece : Piece, row):
         if abs(piece.get_row() - row) == 2:
@@ -245,6 +290,7 @@ class Board:
         else:
             self.turn = 'w'
             self.fullmove += 1
+        print(self.get_fen())
 
 
     """
@@ -281,6 +327,8 @@ class Board:
 
 
     def coords_to_string(self, coords):
+        if not coords:
+            return '-'
         row = str(8 - coords[0])
         col = 'abcdefgh'[coords[1]]
         return col + row
@@ -436,6 +484,9 @@ class Board:
         elif self.check_mate(BLACK):
             self.winner = WHITE
             return WHITE
+        if self.halfmove == 50:
+            self.winner = 'TIE'
+            return 'TIE'
         return None
 
 
