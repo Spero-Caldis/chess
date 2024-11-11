@@ -157,8 +157,8 @@ class Board:
         output.append(self.get_en_passant_string())
         output.append(self.get_halfmove_string())
         output.append(self.get_fullmove_string())
-        output.append(self.get_king_is_checked_string(WHITE))
-        output.append(self.get_king_is_checked_string(BLACK))
+        # output.append(self.get_king_is_checked_string(WHITE))
+        # output.append(self.get_king_is_checked_string(BLACK))
         return output
 
 
@@ -362,28 +362,33 @@ class Board:
         board = self._check_board_given(board)
 
         moves = self._traverse_pawn_diagonal(king_coords, colour, board)
-        if checker(colour, board, moves, ['p']):        #Checking if pawn is holding king under check
-            return checker(colour, board, moves, ['p']) 
+        output = checker(colour, board, moves, ['p'])
+        if output:        #Checking if pawn is holding king under check
+            return output
         
         moves = self._traverse_diagonal(king_coords, colour, True, board)
-        if checker(colour, board, moves, ['b','q']):    #Checking if bishop or queen is holding king under check
-            return checker(colour, board, moves, ['b','q'])
+        output = checker(colour, board, moves, ['b','q'])
+        if output:    #Checking if bishop or queen is holding king under check
+            return output
         
         moves = self._traverse_vertical(king_coords, colour, True, board)
         moves += self._traverse_horizontal(king_coords, colour, True, board)
-        if checker(colour, board, moves, ['r','q']):    #Checking if rook or queen is holding king under check
-            return checker(colour, board, moves, ['r','q'])
+        output = checker(colour, board, moves, ['r','q'])
+        if output:    #Checking if rook or queen is holding king under check
+            return output
         
 
         moves = self._traverse_knight(king_coords, colour, board)
-        if checker(colour, board, moves, ['n']):        #Checking if knight is holding king under check
-            return checker(colour, board, moves, ['n'])
+        output = checker(colour, board, moves, ['n'])
+        if output:        #Checking if knight is holding king under check
+            return output
         
         moves = self._traverse_diagonal(king_coords, colour, False, board)
         moves += self._traverse_vertical(king_coords, colour, False, board)
         moves += self._traverse_horizontal(king_coords, colour, False, board)
-        if checker(colour, board, moves, ['k']):        #Checking if king is holding king under check
-            return checker(colour, board, moves, ['k'])
+        output = checker(colour, board, moves, ['k'])
+        if output:        #Checking if king is holding king under check
+            return output
         
         return False
 
@@ -414,13 +419,15 @@ class Board:
         start_board = self.get_board_list()
         piece = start_board[coords[0]][coords[1]]
         start_board[coords[0]][coords[1]] = '.'
-        king_coords = self.get_king_pos(colour)
 
         valid_moves = []
 
         for row, col in moves:
             working_board = [x.copy() for x in start_board]
             working_board[row][col] = piece
+            king_coords = self.get_king_pos(colour)
+            if piece.lower() == 'k':
+                king_coords = (row, col)
             output = self._king_is_checked(king_coords, colour, working_board)
             if not output:
                 valid_moves.append((row, col))
