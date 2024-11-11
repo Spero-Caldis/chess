@@ -78,6 +78,12 @@ class Piece:
         self.col = col
         self.calc_pos()
 
+    
+    def change_piece_type(self, new_piece_code):
+        self.piece_code = new_piece_code
+        self.piece_type = CODE_TO_NAME[new_piece_code.lower()]
+        self.piece_sprite = self.get_sprite(new_piece_code)
+
 
     def __repr__(self):
         return self.piece_code

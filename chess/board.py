@@ -1,6 +1,7 @@
 import pygame
 from .constants import SQUARE_1, SQUARE_2, ROWS, COLS, SQUARE_SIZE, BLACK, WHITE, CODE_TO_NAME
 from .piece import Piece
+from .evolvepawn import EvolvePawn
 
 
 class Board:
@@ -197,9 +198,12 @@ class Board:
         self._check_castle(piece, row, col)
         self._move(piece, row, col)
         if (row == ROWS - 1 or row == 0) and piece.get_piece_type() == 'Pawn':
-            pass
-            #TODO make it so pawns can become other piece when touching opposite end
-    
+            temp = []
+            EvolvePawn(temp)
+            new_piece_code = temp[0]
+            if piece.get_colour == WHITE:
+                new_piece_code = new_piece_code.upper()
+            piece.change_piece_type(new_piece_code)
 
     def _set_new_en_passant(self, piece : Piece, row):
         if abs(piece.get_row() - row) == 2:
