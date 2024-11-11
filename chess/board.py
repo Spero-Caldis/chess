@@ -45,7 +45,7 @@ class Board:
         if self.get_en_passant()[0] == 2:
             return (3, self.get_en_passant()[1])
         else:
-            return (4, self.get_en_passant()[0])
+            return (4, self.get_en_passant()[1])
 
 
     def get_board_list(self):

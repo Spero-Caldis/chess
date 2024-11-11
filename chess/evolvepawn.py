@@ -3,6 +3,7 @@ from tkinter import *
 class EvolvePawn:
     def __init__(self, output):
         self.root = Tk()
+        self.root.eval('tk::PlaceWindow . center')
         self.output = output
         self.root.title("Evolve Pawn")
         self.root.geometry('200x120')
