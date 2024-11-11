@@ -18,7 +18,7 @@ VALID = (0, 0, 255) #Showing valid movements for a given piece
 
 #Starting Fen string
 START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-
+#"krn5/8/8/8/8/8/8/K7 w KQkq - 0 1"
 #INFO DISPLAY STUFF
 INFO_DISPLAY_WIDTH = 300
 PADDING = 10

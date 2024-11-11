@@ -165,6 +165,12 @@ class Board:
             output.append('White has won the game!')
         elif self.winner == BLACK:
             output.append('Black has won the game!')
+        elif self.winner == 'TIE':
+            output.append('The game is a TIE,')
+            output.append('via the 50 move rule')
+        elif self.winner == 'STALEMATE':
+            output.append('The game is a TIE,')
+            output.append('via stalemate')
         return output
 
 
@@ -423,7 +429,7 @@ class Board:
             pieces = [x.upper() for x in pieces]
         for row, col in coords:
             if board[row][col] in pieces:
-                return (row, col)
+                return True
         return False
 
 
@@ -472,19 +478,25 @@ class Board:
                     continue
                 elif piece.get_colour() == colour:
                     possible_moves += self.get_valid(piece)
-        if len(possible_moves) == 0:
+        king_coords = self.get_king_pos(colour)
+        if len(possible_moves) == 0 and self._king_is_checked(king_coords, colour):
             return True
+        if len(possible_moves) == 0:
+            return 'STALEMATE'
         return False
 
 
     def check_for_winner(self):
-        if self.check_mate(WHITE):
+        if self.check_mate(WHITE) == 'STALEMATE' or self.check_mate(BLACK) == 'STALEMATE':
+            self.winner = 'STALEMATE'
+            return 'STALEMATE'
+        elif self.check_mate(WHITE):
             self.winner = BLACK
             return BLACK
         elif self.check_mate(BLACK):
             self.winner = WHITE
             return WHITE
-        if self.halfmove == 50:
+        if self.halfmove == 100:
             self.winner = 'TIE'
             return 'TIE'
         return None
