@@ -11,7 +11,7 @@ class Board:
             self.board = [self.writerow(rows[x], x) for x in range(8)]
             self.turn = info[1]
             self.castle = self.castle_string_to_list(info[2])
-            self.en_passant = self.get_en_passant_coords(info[3])
+            self.en_passant = self.string_to_coords(info[3])
             self.halfmove = info[4]
             self.fullmove = info[5]
 
@@ -36,14 +36,6 @@ class Board:
 
     def get_turn(self):
         return self.turn
-    
-    
-    def get_en_passant_coords(self, en_passant):
-        if en_passant == '-':
-            return False
-        row = int(en_passant[1])
-        col = 'abcdefgh'.find(self.en_passant[0])
-        return (row, col)
     
 
     def get_en_passant(self):
@@ -88,7 +80,7 @@ class Board:
             else:
                 return 'White cannot castle'
         else:
-            if self.caste[2] and self.castle[3]:
+            if self.castle[2] and self.castle[3]:
                 return 'Black can castle both sides'
             elif self.castle[2]:
                 return 'Black can castle King side'
@@ -109,10 +101,22 @@ class Board:
             return (self.castle[2], self.castle[3])
         
 
+    def string_to_coords(self, string):
+        if string == '-':
+            return False
+        col = 'abcdefgh'.find(string[0])
+        row = (8-int(string[1]))
+        return (row, col)
+
+    def coords_to_string(self, coords):
+        row = str(8 - coords[0])
+        col = 'abcdefgh'[coords[1]]
+        return col + row
+
     def get_en_passant_string(self):
-        if self.en_passant == '-':
+        if self.en_passant == False:
             return 'No en passant square'
-        return 'The en passant square is: ' + self.en_passant
+        return 'The en passant square is: ' + self.coords_to_string(self.en_passant)
 
 
     def get_halfmove_string(self):
@@ -125,13 +129,24 @@ class Board:
 
     def get_game_state_string(self):
         output = ""
-        output += self.get_board_string() + '\n'
+        # output += self.get_board_string() + '\n'
         output += self.get_turn_string() + '\n'
         output += self.get_castle_string('w') + '\n'
         output += self.get_castle_string('b') + '\n'
         output += self.get_en_passant_string() + '\n'
         output += self.get_halfmove_string() + '\n'
         output += self.get_fullmove_string()
+        return output
+
+
+    def get_game_state_list(self):
+        output = []
+        output.append(self.get_turn_string())
+        output.append(self.get_castle_string('w'))
+        output.append(self.get_castle_string('b'))
+        output.append(self.get_en_passant_string())
+        output.append(self.get_halfmove_string())
+        output.append(self.get_fullmove_string())
         return output
 
 

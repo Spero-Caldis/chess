@@ -6,13 +6,17 @@ class DisplayInfo:
         self.win = surface
         self.info = info
         self.update()
+
+    
+    def set_info(self, info):
+        self.info = info
     
     def update(self):
         self.win.fill(INFO_DISPLAY_BOARDER)
-        pg.draw.rect(self.win, INFO_DISPLAY_MAIN, (PADDING, PADDING, INFO_DISPLAY_WIDTH - 2*PADDING, HEIGHT - 2*PADDING))
+        pg.draw.rect(self.win, INFO_DISPLAY_MAIN, (PADDING, PADDING, INFO_DISPLAY_WIDTH - 2*PADDING, HEIGHT//6 + PADDING))
 
-        font = pg.font.Font('chess/fonts/arial.ttf', 25)
+        font = pg.font.Font('chess/fonts/arial.ttf', 20)
 
         for i, line in enumerate(self.info):
             text = font.render(line , True, TEXTCOLOUR)
-            self.win.blit(text, [PADDING*2, PADDING*(3 + i*3)])
+            self.win.blit(text, [PADDING*2, PADDING*(2 + i*2)])

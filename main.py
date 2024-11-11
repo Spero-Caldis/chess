@@ -43,8 +43,10 @@ def main():
         game.update()
         WIN.blit(BOARD, (0, 0))
         
+        info_display.set_info(game.get_info())
         info_display.update()
         WIN.blit(INFODISPLAY, (WIDTH, 0))
+
         pygame.display.update()
     
     pygame.quit()
