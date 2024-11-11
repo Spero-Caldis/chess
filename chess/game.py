@@ -41,8 +41,14 @@ class Game:
         self._init()
 
 
+    def done(self):
+        if self.board.winner == None:
+            return False
+        return True
+
     def change_turn(self):
         self.valid_moves = {}
+        self.board.change_turn()
         if self.turn == 'w':
             self.turn = 'b'
         else:

@@ -16,8 +16,9 @@ class Board:
             self.turn = info[1]
             self.castle = self.castle_string_to_list(info[2])
             self.en_passant = self.string_to_coords(info[3])
-            self.halfmove = info[4]
-            self.fullmove = info[5]
+            self.halfmove = int(info[4])
+            self.fullmove = int(info[5])
+            self.winner = None
 
 
     def __str__(self):
@@ -157,8 +158,12 @@ class Board:
         output.append(self.get_en_passant_string())
         output.append(self.get_halfmove_string())
         output.append(self.get_fullmove_string())
-        # output.append(self.get_king_is_checked_string(WHITE))
-        # output.append(self.get_king_is_checked_string(BLACK))
+        output.append(self.get_king_is_checked_string(WHITE))
+        output.append(self.get_king_is_checked_string(BLACK))
+        if self.winner == WHITE:
+            output.append('White has won the game!')
+        elif self.winner == BLACK:
+            output.append('Black has won the game!')
         return output
 
 
@@ -179,11 +184,15 @@ class Board:
     def _move(self, piece : Piece, row, col):
         if self.get_piece(row, col) != '.':
             self.remove(self.get_piece(row, col))
+            self.halfmove = 0
         self.board[row][col],self.board[piece.row][piece.col] = self.board[piece.row][piece.col], '.'
         piece.move(row, col)
 
 
     def move(self, piece : Piece, row, col):
+        self.halfmove += 1
+        if piece.get_piece_type() == 'Pawn':
+            self.halfmove = 0
         self._check_en_passant(piece, row, col)
         self._check_castle(piece, row, col)
         self._move(piece, row, col)
@@ -223,6 +232,15 @@ class Board:
         if (row, col) == self.get_en_passant():
             to_remove = self.get_en_passant_to_remove()
             self.remove(self.get_piece(to_remove[0], to_remove[1]))
+
+
+    def change_turn(self):
+        self.check_for_winner()
+        if self.turn == 'w':
+            self.turn = 'b'
+        else:
+            self.turn = 'w'
+            self.fullmove += 1
 
 
     """
@@ -393,6 +411,29 @@ class Board:
         return False
 
 
+    def check_mate(self, colour):
+        board = self.board  
+        possible_moves = []
+        for row in board:
+            for piece in row:
+                if piece == '.':
+                    continue
+                elif piece.get_colour() == colour:
+                    possible_moves += self.get_valid(piece)
+        if len(possible_moves) == 0:
+            return True
+        return False
+
+
+    def check_for_winner(self):
+        if self.check_mate(WHITE):
+            self.winner = BLACK
+            return BLACK
+        elif self.check_mate(BLACK):
+            self.winner = WHITE
+            return WHITE
+        return None
+
 
     """
     Finding valid moves methods
@@ -425,9 +466,7 @@ class Board:
         for row, col in moves:
             working_board = [x.copy() for x in start_board]
             working_board[row][col] = piece
-            king_coords = self.get_king_pos(colour)
-            if piece.lower() == 'k':
-                king_coords = (row, col)
+            king_coords = self.get_king_pos(colour,working_board)
             output = self._king_is_checked(king_coords, colour, working_board)
             if not output:
                 valid_moves.append((row, col))
@@ -603,7 +642,8 @@ class Board:
         moves += self._traverse_diagonal(coords, colour, False)
         moves += self._traverse_vertical(coords, colour, False)
         moves += self._traverse_horizontal(coords, colour, False)
-        moves += self._traverse_castling(colour)
+        if not self._king_is_checked(coords, colour):
+            moves += self._traverse_castling(colour)
         return moves
 
 

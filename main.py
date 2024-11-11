@@ -29,12 +29,13 @@ def main():
     while run:
         clock.tick(FPS)
 
-        #TODO Determine winner
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
             
+            if game.done():
+                continue
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 row, col = get_row_col_from_mouse(pos)

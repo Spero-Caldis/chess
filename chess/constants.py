@@ -17,8 +17,8 @@ INFO_DISPLAY_MAIN = '#ADD8E6'
 VALID = (0, 0, 255) #Showing valid movements for a given piece
 
 #Starting Fen string
-# START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-START_FEN = "rnbqkbnr/pppppppp/8/q7/Q7/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1"
+START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+# START_FEN = "r3k2r/pppppppp/8/7Q/7q/8/PPPPPPPP/R3K2R w KQkq - 0 1"
 
 #INFO DISPLAY STUFF
 INFO_DISPLAY_WIDTH = 300
