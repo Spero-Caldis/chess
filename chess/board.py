@@ -1,5 +1,5 @@
 import pygame
-from .constants import SQUARE_1, SQUARE_2, ROWS, COLS, SQUARE_SIZE, BLACK, WHITE
+from .constants import SQUARE_1, SQUARE_2, ROWS, COLS, SQUARE_SIZE, BLACK, WHITE, CODE_TO_NAME
 from .piece import Piece
 
 
@@ -95,13 +95,6 @@ class Board:
                 return 'Black cannot castle'
 
 
-    def get_castle(self, colour):
-        if colour == WHITE:
-            return (self.castle[0], self.castle[1])
-        else:
-            return (self.castle[2], self.castle[3])
-    
-
     def get_en_passant_string(self):
         if self.en_passant == False:
             return 'No en passant square'
@@ -128,6 +121,34 @@ class Board:
         return output
 
 
+    def get_king_pos(self, colour, board=False):
+        board = self._check_board_given(board)
+        if colour == WHITE:
+            king = 'K'
+        else:
+            king = 'k'
+        for row_num, row in enumerate(board):
+            for col_num, piece in enumerate(row):
+                if piece == king:
+                    return (row_num, col_num)
+        return False
+
+
+    def get_king_is_checked_string(self, colour):
+        if colour == WHITE:
+            colour_out = 'White'
+        else:
+            colour_out = 'Black'
+
+        king_coords = self.get_king_pos(colour)
+        checked_state = self._king_is_checked(king_coords, colour)
+        
+
+        if checked_state:
+            return f'{colour_out} is under check'
+        return f'The {colour_out} is not under check'
+
+
     def get_game_state_list(self):
         output = []
         output.append(self.get_turn_string())
@@ -136,8 +157,17 @@ class Board:
         output.append(self.get_en_passant_string())
         output.append(self.get_halfmove_string())
         output.append(self.get_fullmove_string())
+        output.append(self.get_king_is_checked_string(WHITE))
+        output.append(self.get_king_is_checked_string(BLACK))
         return output
 
+
+    def get_castle(self, colour):
+        if colour == WHITE:
+            return (self.castle[0], self.castle[1])
+        else:
+            return (self.castle[2], self.castle[3])
+ 
 
     def get_piece(self, row, col):
         return self.board[row][col]
@@ -315,8 +345,49 @@ class Board:
             output = self.get_board_list()
         else:
             output = board
-        return board
-    
+        return output
+
+
+    def _check_coords_for_pieces(self, colour, board, coords : list, pieces : list):
+        if colour == BLACK:
+            pieces = [x.upper() for x in pieces]
+        for row, col in coords:
+            if board[row][col] in pieces:
+                return (row, col)
+        return False
+
+
+    def _king_is_checked(self, king_coords, colour, board=False):
+        checker = self._check_coords_for_pieces
+        board = self._check_board_given(board)
+
+        moves = self._traverse_pawn_diagonal(king_coords, colour, board)
+        if checker(colour, board, moves, ['p']):        #Checking if pawn is holding king under check
+            return checker(colour, board, moves, ['p']) 
+        
+        moves = self._traverse_diagonal(king_coords, colour, True, board)
+        if checker(colour, board, moves, ['b','q']):    #Checking if bishop or queen is holding king under check
+            return checker(colour, board, moves, ['b','q'])
+        
+        moves = self._traverse_vertical(king_coords, colour, True, board)
+        moves += self._traverse_horizontal(king_coords, colour, True, board)
+        if checker(colour, board, moves, ['r','q']):    #Checking if rook or queen is holding king under check
+            return checker(colour, board, moves, ['r','q'])
+        
+
+        moves = self._traverse_knight(king_coords, colour, board)
+        if checker(colour, board, moves, ['n']):        #Checking if knight is holding king under check
+            return checker(colour, board, moves, ['n'])
+        
+        moves = self._traverse_diagonal(king_coords, colour, False, board)
+        moves += self._traverse_vertical(king_coords, colour, False, board)
+        moves += self._traverse_horizontal(king_coords, colour, False, board)
+        if checker(colour, board, moves, ['k']):        #Checking if king is holding king under check
+            return checker(colour, board, moves, ['k'])
+        
+        return False
+
+
 
     """
     Finding valid moves methods
@@ -338,9 +409,22 @@ class Board:
             case 'Queen':
                 moves = self._get_queen_moves(coords, colour)
             case 'King':
-                moves = self._get_king_moves(coords, colour) 
-            
-        return moves
+                moves = self._get_king_moves(coords, colour)
+
+        start_board = self.get_board_list()
+        piece = start_board[coords[0]][coords[1]]
+        start_board[coords[0]][coords[1]] = '.'
+        king_coords = self.get_king_pos(colour)
+
+        valid_moves = []
+
+        for row, col in moves:
+            working_board = [x.copy() for x in start_board]
+            working_board[row][col] = piece
+            output = self._king_is_checked(king_coords, colour, working_board)
+            if not output:
+                valid_moves.append((row, col))
+        return valid_moves
 
 
     def _traverse(self, start_coords, colour, continuos, transformations, board):
@@ -400,7 +484,8 @@ class Board:
         return moves
 
 
-    def _traverse_pawn_vertical(self, start_coords, transformations):
+    def _traverse_pawn_vertical(self, start_coords, colour):
+        transformations = self._get_pawn_vertical_transformations(start_coords, colour)
         moves = []
         for transformation in transformations:
             row, col = self.transform(start_coords, transformation)
@@ -412,18 +497,27 @@ class Board:
         return moves
 
 
-    def _traverse_pawn_diagonal(self, start_coords, colour, transformations):
+    def _traverse_pawn_diagonal(self, start_coords, colour, board=False):
+        board = self._check_board_given(board)
+        if colour == WHITE:
+            transformations = [(-1,-1),(-1,1)]
+        if colour == BLACK:
+            transformations = [(1,-1),(1,1)]
+
         moves = []
+
         for transformation in transformations:
             row, col = self.transform(start_coords, transformation)
+            if not self.is_on_board(row, col):
+                continue
             coords = (row, col)
-            current = self.board[row][col]
+            current = board[row][col]
             en_passant = self.get_en_passant()
             if coords == en_passant:
                 moves.append( coords )
             elif current == '.':
                 continue
-            elif current.get_colour() != colour:
+            elif self.code_to_colour(current) != colour:
                 moves.append( coords ) 
         return moves
 
@@ -447,8 +541,7 @@ class Board:
         return moves
 
 
-    def _get_pawn_moves(self, coords, colour):
-        moves = []
+    def _get_pawn_vertical_transformations(self, coords, colour):
         if colour == WHITE and coords[0] == 6:
             moved = False
         elif colour == BLACK and coords[0] == 1:
@@ -464,15 +557,14 @@ class Board:
             transformations_vertical = [(-1, 0)]
         elif colour == BLACK:
             transformations_vertical = [(1, 0)]
-        
-        moves += self._traverse_pawn_vertical(coords, transformations_vertical)
 
-        if colour == WHITE:
-            transformations_diagonal = [(-1,-1),(-1,1)]
-        if colour == BLACK:
-            transformations_diagonal = [(1,-1),(1,1)]
-        moves += self._traverse_pawn_diagonal(coords, colour, transformations_diagonal)
+        return transformations_vertical
 
+
+    def _get_pawn_moves(self, coords, colour):
+        moves = []
+        moves += self._traverse_pawn_vertical(coords, colour)
+        moves += self._traverse_pawn_diagonal(coords, colour)
         return moves
 
 

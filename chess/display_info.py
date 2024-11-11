@@ -13,7 +13,7 @@ class DisplayInfo:
     
     def update(self):
         self.win.fill(INFO_DISPLAY_BOARDER)
-        pg.draw.rect(self.win, INFO_DISPLAY_MAIN, (PADDING, PADDING, INFO_DISPLAY_WIDTH - 2*PADDING, HEIGHT//6 + PADDING))
+        pg.draw.rect(self.win, INFO_DISPLAY_MAIN, (PADDING, PADDING, INFO_DISPLAY_WIDTH - 2*PADDING, (len(self.info) + 1)*PADDING*2))
 
         font = pg.font.Font('chess/fonts/arial.ttf', 20)
 
